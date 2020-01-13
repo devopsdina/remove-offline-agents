@@ -1,0 +1,33 @@
+trigger:
+  branches:
+    include:
+    - 'master'
+
+schedules:
+- cron: "0 1 * * 1-5"
+  displayName: "Clean up offline test kitchen agents M-F @ 1am"
+  branches:
+    include:
+    - master
+
+pool:
+  vmImage: 'windows-2019'
+
+name: $(BuildID)
+
+variables:
+  - group: azure-devops-PAT-kv
+  - name: org
+    value: "My-Super-Cool-DevOps-Org"
+  - name: pool
+    value: "My-Super-Sweet-Agent-Pool"
+  - name: apiVersion
+    value: "5.1"
+
+steps:
+  - task: PowerShell@2
+    inputs:
+      targetType: 'filePath'
+      filePath: '.\Remove-OfflineAgents.ps1'
+      arguments: "-PAT $(azuredevops-api-token) -OrganizationName $(org) -AgentPoolName $(pool) -ApiVersion $(apiVersion)"
+    displayName: 'Remove Offline Agents From Agent Pool'
