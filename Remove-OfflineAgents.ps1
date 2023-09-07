@@ -43,10 +43,13 @@ If ($Pools) {
   $Agents = (Invoke-RestMethod -Uri $AgentsUrl -Method 'Get' -Headers @{Authorization = "Basic $EncodedPAT"}).value
   if ($Agents) {
     $AgentNames = ($Agents | Where-Object { $_.status -eq 'Offline'}).Name
+    Write-Output "Printing all offline agents for informational purposes"
+    foreach ($AgentName in $AgentNames) {
+        Write-Output "Removing: $($AgentName) From Pool: $($AgentPoolName) in Organization: $($OrganizationName)"
+    
     $OfflineAgents = ($Agents | Where-Object { $_.status -eq 'Offline'}).id
     foreach ($OfflineAgent in $OfflineAgents) {
-      foreach ($AgentName in $AgentNames) {
-        Write-Output "Removing: $($AgentName) From Pool: $($AgentPoolName) in Organization: $($OrganizationName)"
+        Write-Output "Removing: $($OfflineAgent) ID From Pool: $($AgentPoolName) in Organization: $($OrganizationName)"
         $OfflineAgentsUrl = "https://dev.azure.com/$($OrganizationName)/_apis/distributedtask/pools/$($PoolId)/agents/$($OfflineAgent)?api-version=$($ApiVersion)"
         Invoke-RestMethod -Uri $OfflineAgentsUrl -Method 'Delete' -Headers @{Authorization = "Basic $EncodedPAT"}
       }
